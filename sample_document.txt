@@ -1,0 +1,30 @@
+ADVANCED RETRIEVAL-AUGMENTED GENERATION ARCHITECTURE (RAG-2026)
+Technical Specifications & Evaluation Handbook
+
+1. INTRODUCTION TO RAG SYSTEMS
+Retrieval-Augmented Generation (RAG) is a modern AI framework that enhances Large Language Model (LLM) responses by referencing an external knowledge base of enterprise documents. Instead of relying solely on parametric memory, the RAG system extracts relevant textual context snippets from uploaded PDF files, converts them into dense vector embeddings, and stores them in a vector index.
+
+During query execution, the system calculates cosine similarity between the user query embedding and indexed document chunks. The top-K most relevant chunks are injected into the system prompt along with strict anti-hallucination guardrails. This guarantees that model responses are directly grounded in factual context and accompanied by exact source citations.
+
+2. VECTOR DATABASE & CHUNKING BENCHMARKS
+Vector databases act as the primary indexing engine for fast nearest-neighbor search. In this implementation, two vector storage engines are supported:
+- FAISS (Facebook AI Similarity Search): Optimized for high-throughput in-memory similarity search using normalized inner-product distance. In benchmark tests on a 10,000-chunk dataset, FAISS achieved query latency under 12 milliseconds.
+- ChromaDB: Provides flexible persistent metadata storage and multi-collection support.
+
+Optimal text chunking parameter guidelines:
+- Chunk Size: Recommended between 800 and 1200 characters to capture complete semantic ideas without diluting similarity scores.
+- Chunk Overlap: Recommended between 100 and 200 characters to prevent loss of context across document boundaries.
+
+3. RAG EVALUATION METRICS
+To measure retrieval and answer synthesis quality without manual spot-checking, three primary evaluation metrics are monitored:
+- Faithfulness / Groundedness: Measures whether every statement in the generated answer is strictly derived from the retrieved context chunks. Target threshold: >= 85%.
+- Answer Relevance: Measures how directly the generated response addresses the user's initial question intent. Target threshold: >= 90%.
+- Context Precision: Measures the ratio of relevant chunks retrieved in top-K relative to irrelevant noise. Target threshold: >= 80%.
+
+4. OUT-OF-DOCUMENT GUARDRAILS
+When a user asks a question whose content is absent from the indexed documents (for example, "What is the capital of France?" when only financial PDFs are uploaded), the system computes similarity scores for top-K chunks. If the maximum similarity score falls below the configured threshold (default: 0.30), the strict guardrail activates. In Strict Document-Only Mode, the assistant refuses to fabricate an answer and responds with: "I could not find sufficient information in the uploaded document(s) to answer this question."
+
+5. PERFORMANCE TARGETS
+- Average Vector Search Latency: < 50ms
+- Total End-to-End RAG Query Response Time: < 1.8 seconds
+- Supported File Types: PDF, Plain Text (.txt), Markdown (.md)
